@@ -1,0 +1,4 @@
+**/data
+images/*
+*.pyc
+.DS_Store
