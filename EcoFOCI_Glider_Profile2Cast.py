@@ -1,16 +1,41 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
 """
-Created on Fri Dec  8 07:30:11 2017
 
-@author: bell
+ Background:
+ --------
+ EcoFOCI_Glider_Profile2Cast.py
+ 
+ Purpose:
+ --------
+ Subset Oculus Glider Data from downcast/upcast dives to singel location cast profiles.
+
+ The cast profiles may be created with one of the following three assumptions:
+    - downcast only, gridded to 1m bins, geolocation as last good surface point or linear
+        interpolation if no surface point
+    - upcast only, gridded to 1m bins, geolocation of first good surface point or linear 
+        interpolation if no surface point
+    - hybrid, gridded to 1m bins, geolocation of last good surface point or linear interpolation 
+        if no surface point.  **This is used to address salinity spikes in sharp interfaces**
+
+ Variables kept: Temp, Salinity, Flourometry, PAR (u,d)
+
+ History:
+ --------
+
 """
+
+#System Stack
 import os
-import xarray as xa
+import argparse
+
+#Science Stack
 import numpy as np
 import pandas as pd
+import xarray as xa
+
+# Visual Stack
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+
 
 ###
 
@@ -35,13 +60,18 @@ mpl.rcParams['xtick.color'] = 'grey'
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['lines.markersize'] = 2
 
-### Load Data
-path='/Users/bell/ecoraid/2017/Profilers/OculusGliders/bering_sea_fall17/erddap/sg401/'
-#'0085','0230','0400','0490','0500','0510','1000','1100','1500'
-dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
-#dives = [f for f in os.listdir(path) if f.endswith('.nc')]
+"""----------------------------- Main -------------------------------------"""
 
-keep_plots = True
+parser = argparse.ArgumentParser(description='Oculus Glider Profile2Cast ')
+parser.add_argument('filepath', metavar='filepath', type=str,
+    help='path to directory with UW processed glider files')
+parser.add_argument('--plots', action="store_true",
+    help='include profile and comparison plots as output')
+
+### Load Data
+#dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
+
+dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
 
 for divenum in dives:
     fn = 'p401'+divenum+'.nc'
@@ -78,7 +108,7 @@ for divenum in dives:
         downcast_trans = np.hstack((downcast_trans,[downcast_trans.max()+1]))
         
         ### Basic Plot with identified points
-        if keep_plots:
+        if args.plots:
             fig = plt.figure(3, figsize=(4.5,9), facecolor='w', edgecolor='w')
             ax1 = fig.add_subplot(121)
             plt.plot(xdf.temperature,xdf.depth,'r.-')
@@ -111,7 +141,7 @@ for divenum in dives:
         """-----------------------------------------------------------------"""
         
         ### Merged Profile w/filling
-        if keep_plots:
+        if args.plots:
             fig = plt.figure(5, figsize=(4.5,11), facecolor='w', edgecolor='w')
             ax1 = fig.add_subplot(121)
             plt.plot(xdf.temperature[0:upper_depth_index[0]+1],xdf.depth[0:upper_depth_index[0]+1],'r.-')
@@ -146,7 +176,7 @@ for divenum in dives:
         print fn + " successfully adjusted"
     except:
         ### Basic Plot
-        if keep_plots:
+        if args.plots:
             fig = plt.figure(1, figsize=(4.5,11), facecolor='w', edgecolor='w')
             ax1 = fig.add_subplot(121)
             plt.plot(xdf.temperature,xdf.depth,'r.-')

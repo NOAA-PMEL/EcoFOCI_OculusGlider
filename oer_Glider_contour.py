@@ -79,7 +79,7 @@ class MidpointNormalize(colors.Normalize):
 
 parser = argparse.ArgumentParser(description='Oculus Glider datafile parser ')
 parser.add_argument('filepath', metavar='filepath', type=str,
-			   help='full path to file')
+	help='full path to file')
 parser.add_argument('--maxdepth', type=float, 
 	help="known bathymetric depth at location")
 parser.add_argument('--paramspan', nargs='+', type=float, 
