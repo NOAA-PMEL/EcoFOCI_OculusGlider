@@ -11,6 +11,9 @@ This archive hosts utilities and workflows to edit, view, qc, and process Oculus
 ## Archival Science Data Set - Background, Procedures, and Algorithms
 `Seen during the 2017 Northern Bering Sea Deployment of Glider 402 (and not unique to this mission) strong temperature gradients (>10deg over a couple of meters) overwhelm the thermal response of the salinity (and oxygen) optodes.  This leads to unphysical spikes in salinity and oxygen which is either removed or flagged in error.  We have an ability to improve these sharp regions.`
 
+### Jupyter Notebook Examples and Additional Documentation
+These can be found in the 'notebooks' subdirectory
+
 ################
 
 Legal Disclaimer
