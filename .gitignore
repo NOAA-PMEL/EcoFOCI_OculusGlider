@@ -1,4 +1,10 @@
+# ignore data and images folders
 **/data
-images/*
+**/images
+**/EcoFOCI_config/
+
+#python
 *.pyc
-.DS_Store
+
+#data types
+*.nc
