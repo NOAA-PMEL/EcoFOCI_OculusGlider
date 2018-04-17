@@ -8,3 +8,4 @@
 
 #data types
 *.nc
+.DS_Store
