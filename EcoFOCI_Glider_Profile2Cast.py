@@ -16,7 +16,13 @@
     - hybrid, gridded to 1m bins, geolocation of last good surface point or linear interpolation 
         if no surface point.  **This is used to address salinity spikes in sharp interfaces**
 
- Variables kept: Temp, Salinity, Flourometry, PAR (u,d)
+
+ Assumptions:
+ ------------
+ dt/dz threshold on both up and donwcast set to *** 1 ***
+
+ on merged profiles - keep: Temp, Salinity, Flourometry, PAR (u,d), (oxy?), lat, lon, depth/press
+
 
  History:
  --------
@@ -65,21 +71,25 @@ mpl.rcParams['lines.markersize'] = 2
 parser = argparse.ArgumentParser(description='Oculus Glider Profile2Cast ')
 parser.add_argument('filepath', metavar='filepath', type=str,
     help='path to directory with UW processed glider files')
+parser.add_argument('-gid','--gliderid', nargs=1, type=str,
+    help='glider id used for data eg p401, p403')
 parser.add_argument('--plots', action="store_true",
     help='include profile and comparison plots as output')
 
+args = parser.parse_args()
+
 ### Load Data
-#dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
+dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
 
-dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
+#dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
 
-for divenum in dives:
-    fn = 'p401'+divenum+'.nc'
+for divenum in sorted(dives):
+    fn = args.gliderid[0]+divenum+'.nc'
     #fn = divenum
     print fn
     
     try:
-        xdf = xa.open_dataset(path+fn,decode_cf=False)
+        xdf = xa.open_dataset(args.filepath+fn,decode_cf=False)
         xdf.set_coords(['time','depth','latitude','longitude'],inplace=True)
     except:
         print fn + " unloadable - missing key variable"
@@ -91,10 +101,16 @@ for divenum in dives:
         # lower bound to downcast
         # bottom of profile
         # upper bound of upcast
+
         dtdz_down_thresh = -1
         dtdz_up_thresh = -1
         dtdz = np.gradient(xdf.temperature,xdf.depth)
         
+        
+        ### Assuming a two layer system with a sharp interface 
+        #    Find the bottom of the upper layer on the downcast
+        #    Find the top of the bottom layer on the upcast
+        # fail out of this try statement if none of the sharpness criterion are met
         upper_depth = xdf.depth[dtdz<dtdz_down_thresh][0]
         upper_depth_index = np.where(xdf.depth == upper_depth)[0] - 1 #make shallower by one
         if len(upper_depth_index) >1 :
@@ -129,7 +145,7 @@ for divenum in dives:
         """-----------------------------------------------------------------"""
         ### Fill Profile
         # Scale both temperature and salinty to 0->1
-        
+        # this maps the shape of the temperature profile to the salinity profile
         def scale(x):
            return (x-min(x)) / (max(x) - min(x))
         
@@ -162,19 +178,23 @@ for divenum in dives:
             plt.close()
         
         sal_cor = np.hstack((xdf.salinity[0:upper_depth_index[0]+1],sprime,xdf.salinity[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        #sal_cor.shape=(1,1,len(sal_cor),1)
         temp_cor = np.hstack((xdf.temperature[0:upper_depth_index[0]+1],xdf.temperature[downcast_trans],xdf.temperature[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        #temp_cor.shape=(1,1,len(temp_cor),1)
         press_cor = np.hstack((xdf.depth[0:upper_depth_index[0]+1],xdf.depth[downcast_trans],xdf.depth[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        pdfa = pd.DataFrame(np.stack((sal_cor,temp_cor,press_cor)).T, columns=['Salinity','Temperature','Pressure'])        
+        fluor_cor = np.hstack((xdf.wlbb2fl_sig695nm_adjusted[0:upper_depth_index[0]+1],xdf.wlbb2fl_sig695nm_adjusted[downcast_trans],xdf.wlbb2fl_sig695nm_adjusted[bottom_depth_index[0]:lower_depth_index[0]+1]))
+
+        pdfa = pd.DataFrame(np.stack((sal_cor,temp_cor,press_cor,fluor_cor)).T, columns=['Salinity','Temperature','Pressure','ChlorophyllA'])        
         pdfa.set_index('Pressure', inplace=True)
         pdfa.sort_index(inplace=True)
         
         xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
         
-        xdfa.to_netcdf('data/'+fn)
+        #bin average only maintained profiles to 1m labeled at 0.5m bins
+        depth_bin=list(np.arange(0.5,100.5,1))
+        depth_bin_labels=range(1,100,1)
+        onem_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
+        onem_dfa.to_netcdf('data/'+fn.replace('.nc','_m.nc'))
         print fn + " successfully adjusted"
-    except:
+    except: #fails sharpness routine, bin average the upcast and downcast independently
         ### Basic Plot
         if args.plots:
             fig = plt.figure(1, figsize=(4.5,11), facecolor='w', edgecolor='w')
@@ -192,5 +212,44 @@ for divenum in dives:
             plt.close()  
 
         print fn + " not adjusted"
-    
+
+        ### Downcast
+        bottom_depth = xdf.depth.max()
+        bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
+        sal_down = xdf.salinity[0:bottom_depth_index[0]]
+        temp_down = xdf.temperature[0:bottom_depth_index[0]]
+        press_down = xdf.depth[0:bottom_depth_index[0]]
+        fluor_down = xdf.wlbb2fl_sig695nm_adjusted[0:bottom_depth_index[0]]
+
+        pdfa = pd.DataFrame(np.stack((sal_down,temp_down,press_down,fluor_down)).T, columns=['Salinity','Temperature','Pressure','ChlorophyllA'])        
+        pdfa.set_index('Pressure', inplace=True)
+        pdfa.sort_index(inplace=True)
+        
+        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
+        
+        #bin average only maintained profiles to 1m labeled at 0.5m bins
+        depth_bin=list(np.arange(0.5,100.5,1))
+        depth_bin_labels=range(1,100,1)
+        down_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
+        down_dfa.to_netcdf('data/'+fn.replace('.nc','_d.nc'))
+
+        ### Upcast
+        bottom_depth = xdf.depth.max()
+        bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
+        sal_up = xdf.salinity[bottom_depth_index[0]:-1]
+        temp_up = xdf.temperature[bottom_depth_index[0]:-1]
+        press_up = xdf.depth[bottom_depth_index[0]:-1]
+        fluor_up = xdf.wlbb2fl_sig695nm_adjusted[bottom_depth_index[0]:-1]
+
+        pdfa = pd.DataFrame(np.stack((sal_up,temp_up,press_up,fluor_up)).T, columns=['Salinity','Temperature','Pressure','ChlorophyllA'])        
+        pdfa.set_index('Pressure', inplace=True)
+        pdfa.sort_index(inplace=True)
+        
+        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
+        
+        #bin average only maintained profiles to 1m labeled at 0.5m bins
+        depth_bin=list(np.arange(0.5,100.5,1))
+        depth_bin_labels=range(1,100,1)
+        up_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
+        up_dfa.to_netcdf('data/'+fn.replace('.nc','_u.nc'))
     xdf.close()

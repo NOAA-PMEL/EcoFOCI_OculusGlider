@@ -11,6 +11,34 @@ This archive hosts utilities and workflows to edit, view, qc, and process Oculus
 ## Archival Science Data Set - Background, Procedures, and Algorithms
 `Seen during the 2017 Northern Bering Sea Deployment of Glider 402 (and not unique to this mission) strong temperature gradients (>10deg over a couple of meters) overwhelm the thermal response of the salinity (and oxygen) optodes.  This leads to unphysical spikes in salinity and oxygen which is either removed or flagged in error.  We have an ability to improve these sharp regions.`
 
+Two types of profiles to deal with... sharp interfaces at the thermocline (which causes spiking in salinity and oxygen) and relaxed interfaces.  
+- Sharp interfaces will be addressed by merging the upper portion of a downcast with the lower portion of an upcast.  The interface's temperature shape (a fast and more reliable measurement) will be used to interpolate between the two layers.  Data will then be binned in 1m intervals.
+- Relaxed interfaces will be binned into 1m intervals on the upcast and downcast seperately to determine which is a more appropriate cast to maintain (perhaps both)
+
+#### Data and parameters to keep when making science set
+- temperature (has thermal corrections)
+- salinity (has minor qc and thermal corrections)
+- chlor (no corrections - just converted from digital counts)
+- par (no corrections - just converted from digital counts)
+- time, lat, lon, depth (see below)
+**TODO** Oxygen?
+
+#### Gaps when bin averaging
+- if no data exists in a gap... currently leave as missing (or linearly interpolate?)
+
+#### Location and Time
+**For the 2017 Bering Fieldop, the platform surfaced once every three dives**
+- It is believed that the UW software geo-routines accounts for this.  Locations (and associated times) can be decimated in the following maner:
+- Sharp interfaces will use the location when the platform was at depth
+- Relaxed interfaces will use the location at the start of the dive for downcasts and the initial location at the end of the dive for upcasts. (simplify routines by using the location at 1m)
+***Should the lat/lons not have an automatic correction, linear interpolation along the path between the initial dive and initial surfacing will be used to estimate location***
+
+
+#### MetaData
+- should include the type of profile
+- the dt/dz assumed
+
+
 ### Jupyter Notebook Examples and Additional Documentation
 These can be found in the 'notebooks' subdirectory
 
