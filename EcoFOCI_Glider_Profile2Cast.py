@@ -79,13 +79,13 @@ parser.add_argument('--plots', action="store_true",
 args = parser.parse_args()
 
 ### Load Data
-dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
+#dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
 
-#dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
+dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
 
 for divenum in sorted(dives):
-    fn = args.gliderid[0]+divenum+'.nc'
-    #fn = divenum
+    #fn = args.gliderid[0]+divenum+'.nc'
+    fn = divenum
     print fn
     
     try:
