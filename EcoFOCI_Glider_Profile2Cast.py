@@ -66,6 +66,14 @@ mpl.rcParams['xtick.color'] = 'grey'
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['lines.markersize'] = 2
 
+
+
+def bin_ave(thinned_xarray_set,depth_bin,depth_bin_labels):
+        df = xdfa.to_dataframe()
+        bins=pd.cut(df.index, depth_bin, labels=depth_bin_labels)
+        dfg = df.groupby(bins).mean()
+        
+    return dfg
 """----------------------------- Main -------------------------------------"""
 
 parser = argparse.ArgumentParser(description='Oculus Glider Profile2Cast ')
@@ -186,14 +194,18 @@ for divenum in sorted(dives):
         pdfa.set_index('Pressure', inplace=True)
         pdfa.sort_index(inplace=True)
         
-        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
+        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[bottom_depth_index[0]],'longitude':xdf.longitude[bottom_depth_index[0]],'time':xdf.time[bottom_depth_index[0]]})
         
         #bin average only maintained profiles to 1m labeled at 0.5m bins
-        depth_bin=list(np.arange(0.5,100.5,1))
-        depth_bin_labels=range(1,100,1)
-        onem_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
+        dfg = bin_ave(xdfa,list(np.arange(0.5,100.5,1)),range(1,100,1))
+
+        onem_dfa = xa.Dataset(dfg[['ChlorophyllA','Temperature','Salinity']],
+                              coords={'latitude':xdf.latitude[bottom_depth_index[0]],'longitude':xdf.longitude[bottom_depth_index[0]],'time':xdf.time[bottom_depth_index[0]]})
+        onem_dfa.rename({'dim_0':'Pressure'},inplace=True)
         onem_dfa.to_netcdf('data/'+fn.replace('.nc','_m.nc'))
         print fn + " successfully adjusted"
+
+
     except: #fails sharpness routine, bin average the upcast and downcast independently
         ### Basic Plot
         if args.plots:
@@ -228,11 +240,13 @@ for divenum in sorted(dives):
         xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
         
         #bin average only maintained profiles to 1m labeled at 0.5m bins
-        depth_bin=list(np.arange(0.5,100.5,1))
-        depth_bin_labels=range(1,100,1)
-        down_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
-        down_dfa.to_netcdf('data/'+fn.replace('.nc','_d.nc'))
+        dfg = bin_ave(xdfa,list(np.arange(0.5,100.5,1)),range(1,100,1))
 
+        down_dfa = xa.Dataset(dfg[['ChlorophyllA','Temperature','Salinity']],
+                              coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
+        down_dfa.rename({'dim_0':'Pressure'},inplace=True)
+        down_dfa.to_netcdf('data/'+fn.replace('.nc','_d.nc'))
+       
         ### Upcast
         bottom_depth = xdf.depth.max()
         bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
@@ -245,11 +259,13 @@ for divenum in sorted(dives):
         pdfa.set_index('Pressure', inplace=True)
         pdfa.sort_index(inplace=True)
         
-        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[0],'longitude':xdf.longitude[0],'time':xdf.time[0]})
+        xdfa = xa.Dataset(pdfa,coords={'latitude':xdf.latitude[-1],'longitude':xdf.longitude[-1],'time':xdf.time[-1]})
         
         #bin average only maintained profiles to 1m labeled at 0.5m bins
-        depth_bin=list(np.arange(0.5,100.5,1))
-        depth_bin_labels=range(1,100,1)
-        up_dfa = xdfa.groupby_bins('Pressure',depth_bin,labels=depth_bin_labels).mean()
-        up_dfa.to_netcdf('data/'+fn.replace('.nc','_u.nc'))
+        dfg = bin_ave(xdfa,list(np.arange(0.5,100.5,1)),range(1,100,1))
+
+        up_dfa = xa.Dataset(dfg[['ChlorophyllA','Temperature','Salinity']],
+                              coords={'latitude':xdf.latitude[-1],'longitude':xdf.longitude[-1],'time':xdf.time[-1]})
+        up_dfa.rename({'dim_0':'Pressure'},inplace=True)
+        up_dfa.to_netcdf('data/'+fn.replace('.nc','_u.nc'))        
     xdf.close()
