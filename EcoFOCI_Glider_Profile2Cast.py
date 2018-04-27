@@ -66,12 +66,36 @@ mpl.rcParams['xtick.color'] = 'grey'
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['lines.markersize'] = 2
 
+def find_sharp_grad(xdf,dtdz_down_thresh=-1.0,dtdz_up_thresh=1.0)
+    ### find thresholds in cast
+    # lower bound to downcast
+    # bottom of profile
+    # upper bound of upcast
+
+    dtdz_down_thresh = -1
+    dtdz_up_thresh = -1
+    dtdz = np.gradient(xdf.temperature,xdf.depth)
+
+    ### Assuming a two layer system with a sharp interface 
+    #    Find the bottom of the upper layer on the downcast
+    #    Find the top of the bottom layer on the upcast
+    # fail out of this try statement if none of the sharpness criterion are met
+    upper_depth = xdf.depth[dtdz<dtdz_down_thresh][0]
+    upper_depth_index = np.where(xdf.depth == upper_depth)[0] - 1 #make shallower by one
+    if len(upper_depth_index) >1 :
+        upper_depth_index = np.array([upper_depth_index[0]])
+    bottom_depth = xdf.depth.max()
+    bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
+    lower_depth = xdf.depth[bottom_depth_index[0]:][dtdz[bottom_depth_index[0]:]<dtdz_up_thresh][0]
+    lower_depth_index = np.where(xdf.depth == lower_depth)[0] - 1 #make deeper by one
+            
+    return (upper_depth,upper_depth_index,bottom_depth,bottom_depth_index,lower_depth,lower_depth_index)
 
 
 def bin_ave(thinned_xarray_set,depth_bin,depth_bin_labels):
-        df = xdfa.to_dataframe()
-        bins=pd.cut(df.index, depth_bin, labels=depth_bin_labels)
-        dfg = df.groupby(bins).mean()
+    df = xdfa.to_dataframe()
+    bins=pd.cut(df.index, depth_bin, labels=depth_bin_labels)
+    dfg = df.groupby(bins).mean()
         
     return dfg
 """----------------------------- Main -------------------------------------"""
@@ -105,29 +129,11 @@ for divenum in sorted(dives):
     
     try:
         #%%
-        ### find thresholds in cast
-        # lower bound to downcast
-        # bottom of profile
-        # upper bound of upcast
+        #defaults for sharp boundary are in subroutine or passed as keywords
+        # currently -1 and 1 dt/dz (deg/m)
+        (upper_depth,upper_depth_index,bottom_depth,bottom_depth_index,lower_depth,lower_depth_index) = find_sharp_grad(xdf)
+        
 
-        dtdz_down_thresh = -1
-        dtdz_up_thresh = -1
-        dtdz = np.gradient(xdf.temperature,xdf.depth)
-        
-        
-        ### Assuming a two layer system with a sharp interface 
-        #    Find the bottom of the upper layer on the downcast
-        #    Find the top of the bottom layer on the upcast
-        # fail out of this try statement if none of the sharpness criterion are met
-        upper_depth = xdf.depth[dtdz<dtdz_down_thresh][0]
-        upper_depth_index = np.where(xdf.depth == upper_depth)[0] - 1 #make shallower by one
-        if len(upper_depth_index) >1 :
-            upper_depth_index = np.array([upper_depth_index[0]])
-        bottom_depth = xdf.depth.max()
-        bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
-        lower_depth = xdf.depth[bottom_depth_index[0]:][dtdz[bottom_depth_index[0]:]<dtdz_up_thresh][0]
-        lower_depth_index = np.where(xdf.depth == lower_depth)[0] - 1 #make deeper by one
-        
         downcast_trans = np.where((xdf.depth[0:bottom_depth_index[0]+1] >= upper_depth) & (xdf.depth[0:bottom_depth_index[0]+1] <= lower_depth))[0]
         downcast_trans = np.hstack((downcast_trans,[downcast_trans.max()+1]))
         

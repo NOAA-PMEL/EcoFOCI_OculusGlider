@@ -42,6 +42,11 @@ Two types of profiles to deal with... sharp interfaces at the thermocline (which
 ### Jupyter Notebook Examples and Additional Documentation
 These can be found in the 'notebooks' subdirectory
 
+### TODO:
+#### 2018 Data
+- A new datalogger (scicon) system has been implemented.
+- This data has multiple time words for multiple instruments instead of everything being sampled to the same time.  This will need to be accounted for when creating thinned science data files.  Ultimately, if data is being binned every meter than a uniform window will need to be chosen.  Existing programs may not work or will need to be modified.
+
 ################
 
 Legal Disclaimer
