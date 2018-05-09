@@ -66,14 +66,14 @@ mpl.rcParams['xtick.color'] = 'grey'
 mpl.rcParams['lines.linewidth'] = 0.5
 mpl.rcParams['lines.markersize'] = 2
 
-def find_sharp_grad(xdf,dtdz_down_thresh=-1.0,dtdz_up_thresh=1.0)
+def find_sharp_grad(xdf,dtdz_down_thresh=-1.0,dtdz_up_thresh=1.0):
     ### find thresholds in cast
     # lower bound to downcast
     # bottom of profile
     # upper bound of upcast
 
-    dtdz_down_thresh = -1
-    dtdz_up_thresh = -1
+    dtdz_down_thresh = -1.5
+    dtdz_up_thresh = -1.5
     dtdz = np.gradient(xdf.temperature,xdf.depth)
 
     ### Assuming a two layer system with a sharp interface 
@@ -111,7 +111,7 @@ parser.add_argument('--plots', action="store_true",
 args = parser.parse_args()
 
 ### Load Data
-#dives=['0085','0230','0400','0490','0500','0510','1000','1100','1500']
+#dives=['0262',]
 
 dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
 
@@ -138,18 +138,19 @@ for divenum in sorted(dives):
         downcast_trans = np.hstack((downcast_trans,[downcast_trans.max()+1]))
         
         ### Basic Plot with identified points
+        
         if args.plots:
             fig = plt.figure(3, figsize=(4.5,9), facecolor='w', edgecolor='w')
             ax1 = fig.add_subplot(121)
             plt.plot(xdf.temperature,xdf.depth,'r.-')
-            plt.plot([xdf.temperature[upper_depth_index],xdf.temperature[bottom_depth_index],xdf.temperature[lower_depth_index]]
-                ,[xdf.depth[upper_depth_index],xdf.depth[bottom_depth_index],xdf.depth[lower_depth_index]],'k+')
+            plt.plot([xdf.temperature[upper_depth_index[0]],xdf.temperature[bottom_depth_index[0]],xdf.temperature[lower_depth_index[-1]]]
+                ,[xdf.depth[upper_depth_index[0]],xdf.depth[bottom_depth_index[0]],xdf.depth[lower_depth_index[-1]]],'ko')
             ax1.set_ylim([0,np.nanmax(xdf.depth)])
             ax1.invert_yaxis()
             ax1 = fig.add_subplot(122)
             plt.plot(xdf.salinity,xdf.depth,'b.-')
-            plt.plot([xdf.salinity[upper_depth_index],xdf.salinity[bottom_depth_index],xdf.salinity[lower_depth_index]]
-            ,[xdf.depth[upper_depth_index],xdf.depth[bottom_depth_index],xdf.depth[lower_depth_index]],'k+')
+            plt.plot([xdf.salinity[upper_depth_index[0]],xdf.salinity[bottom_depth_index[0]],xdf.salinity[lower_depth_index[-1]]]
+            ,[xdf.depth[upper_depth_index[0]],xdf.depth[bottom_depth_index[0]],xdf.depth[lower_depth_index[-1]]],'ko')
             ax1.set_ylim([0,np.nanmax(xdf.depth)])
             ax1.invert_yaxis()
             t = fig.suptitle('pre correction profile ' + divenum)
@@ -167,7 +168,7 @@ for divenum in sorted(dives):
             return (1-x)*(y[1] - y[0]) + y[0]
         
         tprime = scale(xdf.temperature[downcast_trans]) # scale
-        sprime = rescale(tprime,[xdf.salinity[upper_depth_index][0],xdf.salinity[lower_depth_index][0]])
+        sprime = rescale(tprime,[xdf.salinity[upper_depth_index][0],xdf.salinity[lower_depth_index][-1]])
         """-----------------------------------------------------------------"""
         
         ### Merged Profile w/filling
@@ -175,13 +176,13 @@ for divenum in sorted(dives):
             fig = plt.figure(5, figsize=(4.5,11), facecolor='w', edgecolor='w')
             ax1 = fig.add_subplot(121)
             plt.plot(xdf.temperature[0:upper_depth_index[0]+1],xdf.depth[0:upper_depth_index[0]+1],'r.-')
-            plt.plot(xdf.temperature[bottom_depth_index[0]:lower_depth_index[0]+1],xdf.depth[bottom_depth_index[0]:lower_depth_index[0]+1],'m.-')
+            plt.plot(xdf.temperature[bottom_depth_index[0]:lower_depth_index[-1]+1],xdf.depth[bottom_depth_index[0]:lower_depth_index[-1]+1],'m.-')
             plt.plot(xdf.temperature[downcast_trans],xdf.depth[downcast_trans],'k.--')
             ax1.set_ylim([0,np.nanmax(xdf.depth)])
             ax1.invert_yaxis()
             ax1 = fig.add_subplot(122)
             plt.plot(xdf.salinity[0:upper_depth_index[0]+1],xdf.depth[0:upper_depth_index[0]+1],'b.-')
-            plt.plot(xdf.salinity[bottom_depth_index[0]:lower_depth_index[0]+1],xdf.depth[bottom_depth_index[0]:lower_depth_index[0]+1],'c.-')
+            plt.plot(xdf.salinity[bottom_depth_index[0]:lower_depth_index[-1]+1],xdf.depth[bottom_depth_index[0]:lower_depth_index[-1]+1],'c.-')
             plt.plot(sprime,xdf.depth[downcast_trans],'k.--')
             ax1.set_xlim([np.nanmin(xdf.salinity),np.nanmax(xdf.salinity)])
             ax1.set_ylim([0,np.nanmax(xdf.depth)])
@@ -191,10 +192,10 @@ for divenum in sorted(dives):
             plt.savefig('images/post_profile_corr_'+divenum+'.png', bbox_inches='tight', dpi = (300))
             plt.close()
         
-        sal_cor = np.hstack((xdf.salinity[0:upper_depth_index[0]+1],sprime,xdf.salinity[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        temp_cor = np.hstack((xdf.temperature[0:upper_depth_index[0]+1],xdf.temperature[downcast_trans],xdf.temperature[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        press_cor = np.hstack((xdf.depth[0:upper_depth_index[0]+1],xdf.depth[downcast_trans],xdf.depth[bottom_depth_index[0]:lower_depth_index[0]+1]))
-        fluor_cor = np.hstack((xdf.wlbb2fl_sig695nm_adjusted[0:upper_depth_index[0]+1],xdf.wlbb2fl_sig695nm_adjusted[downcast_trans],xdf.wlbb2fl_sig695nm_adjusted[bottom_depth_index[0]:lower_depth_index[0]+1]))
+        sal_cor = np.hstack((xdf.salinity[0:upper_depth_index[0]+1],sprime,xdf.salinity[bottom_depth_index[0]:lower_depth_index[-1]+1]))
+        temp_cor = np.hstack((xdf.temperature[0:upper_depth_index[0]+1],xdf.temperature[downcast_trans],xdf.temperature[bottom_depth_index[0]:lower_depth_index[-1]+1]))
+        press_cor = np.hstack((xdf.depth[0:upper_depth_index[0]+1],xdf.depth[downcast_trans],xdf.depth[bottom_depth_index[0]:lower_depth_index[-1]+1]))
+        fluor_cor = np.hstack((xdf.wlbb2fl_sig695nm_adjusted[0:upper_depth_index[0]+1],xdf.wlbb2fl_sig695nm_adjusted[downcast_trans],xdf.wlbb2fl_sig695nm_adjusted[bottom_depth_index[0]:lower_depth_index[-1]+1]))
 
         pdfa = pd.DataFrame(np.stack((sal_cor,temp_cor,press_cor,fluor_cor)).T, columns=['Salinity','Temperature','Pressure','ChlorophyllA'])        
         pdfa.set_index('Pressure', inplace=True)

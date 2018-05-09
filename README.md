@@ -15,12 +15,19 @@ Two types of profiles to deal with... sharp interfaces at the thermocline (which
 - Sharp interfaces will be addressed by merging the upper portion of a downcast with the lower portion of an upcast.  The interface's temperature shape (a fast and more reliable measurement) will be used to interpolate between the two layers.  Data will then be binned in 1m intervals.
 - Relaxed interfaces will be binned into 1m intervals on the upcast and downcast seperately to determine which is a more appropriate cast to maintain (perhaps both)
 
+#### Sharp Interface defined and analyzed for 2017
+**dt/dz** set at multiple values
+- 0.5 -- somewhat weak interface 3445 adjusted profiles, 31 not adjusted
+- 1.0 -- initial assumption      2781 adjusted profiles, 596 not adjusted
+- 1.5 -- strong interface        1748 adjusted profiles, 1728 not adjusted
+
 #### Data and parameters to keep when making science set
 - temperature (has thermal corrections)
 - salinity (has minor qc and thermal corrections)
 - chlor (no corrections - just converted from digital counts)
 - par (no corrections - just converted from digital counts)
 - time, lat, lon, depth (see below)
+- depth averaged current (scalar for each file)
 **TODO** Oxygen?
 
 #### Gaps when bin averaging
