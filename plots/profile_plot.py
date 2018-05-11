@@ -294,6 +294,58 @@ class CTDProfilePlot(object):
 
       return plt, fig
 
+      def plot_ts(salt, temp, press, srange=[28,34], trange=[-2,15], ptitle=""): 
+          plt.style.use('ggplot')
+          
+          # Figure out boudaries (mins and maxs)
+          smin = srange[0]
+          smax = srange[1]
+          tmin = trange[0]
+          tmax = trange[1]
+
+          # Calculate how many gridcells we need in the x and y dimensions
+          xdim = int(round((smax-smin)/0.1+1,0))
+          ydim = int(round((tmax-tmin)+1,0))
+          
+          #print 'ydim: ' + str(ydim) + ' xdim: ' + str(xdim) + ' \n'
+          if (xdim > 10000) or (ydim > 10000): 
+              print('To many dimensions for grid in {cruise} {cast} file. Likely  missing data \n'.format(cruise=cruise,cast=cast))
+              return
+       
+          # Create empty grid of zeros
+          dens = np.zeros((ydim,xdim))
+       
+          # Create temp and salt vectors of appropiate dimensions
+          ti = np.linspace(0,ydim-1,ydim)+tmin
+          si = np.linspace(0,xdim-1,xdim)*0.1+smin
+       
+          # Loop to fill in grid with densities
+          for j in range(0,int(ydim)):
+              for i in range(0, int(xdim)):
+                  dens[j,i]=sw.dens0(si[i],ti[j])
+       
+          # Substract 1000 to convert to sigma-t
+          dens = dens - 1000
+       
+          # Plot data ***********************************************
+          fig = plt.figure(figsize=(12, 12))
+          ax1 = fig.add_subplot(111)
+          CS = plt.contour(si,ti,dens, linestyles='dashed', colors='k')
+          plt.clabel(CS, fontsize=12, inline=1, fmt='%1.1f') # Label every second level
+       
+          ts = ax1.scatter(salt,temp, c=press, cmap='gray', s=10)
+          plt.colorbar(ts )
+          plt.ylim(tmin,tmax)
+          plt.xlim(smin,smax)
+       
+          ax1.set_xlabel('Salinity (PSU)')
+          ax1.set_ylabel('Temperature (C)')
+
+          
+          t = fig.suptitle(ptitle, fontsize=12, fontweight='bold')
+          t.set_y(1.08)
+          return plt, fig 
+
     @staticmethod
     def var2format(epic_key):
       """list of plot specifics based on variable name"""

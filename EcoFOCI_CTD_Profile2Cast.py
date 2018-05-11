@@ -2,12 +2,12 @@
 
  Background:
  --------
- EcoFOCI_Glider_Profile2Cast.py
+ EcoFOCI_CTD_Profile2Cast.py
  
  Purpose:
  --------
- Subset Oculus Glider Data from downcast/upcast dives to singel location cast profiles.
-
+ Compare Glider Algorithm with an SBE CTD profile from a cruise
+ 
  The cast profiles may be created with one of the following three assumptions:
     - downcast only, gridded to 1m bins, geolocation as last good surface point or linear
         interpolation if no surface point
@@ -27,6 +27,8 @@
  History:
  --------
 
+ Glider and CTD use different (non-standard) variable names (thanks EPIC)
+
 """
 
 #System Stack
@@ -37,7 +39,6 @@ import argparse
 import numpy as np
 import pandas as pd
 import xarray as xa
-import seawater as sw
 
 # Visual Stack
 import matplotlib as mpl
@@ -75,7 +76,7 @@ def find_sharp_grad(xdf,thresh=-1.0):
 
     dtdz_down_thresh = thresh
     dtdz_up_thresh = thresh
-    dtdz = np.gradient(xdf.temperature,xdf.depth)
+    dtdz = np.gradient(xdf.T_28[0,:,0,0],xdf.depth)
 
     ### Assuming a two layer system with a sharp interface 
     #    Find the bottom of the upper layer on the downcast
@@ -99,45 +100,34 @@ def bin_ave(thinned_xarray_set,depth_bin,depth_bin_labels):
     dfg = df.groupby(bins).mean()
         
     return dfg
-
-def find_max_inversion(temperature=None,salinity=None,pressure=None):
-    sigmat = sw.dens(s=salinity,t=temperature,p=pressure) - 1000.
-    dtdz = np.gradient(sigmat,pressure)
-
-    return np.nanmin(dtdz),np.nanargmin(dtdz)
-
-
+#%%
 """----------------------------- Main -------------------------------------"""
 
-parser = argparse.ArgumentParser(description='Oculus Glider Profile2Cast ')
+parser = argparse.ArgumentParser(description='EcoFOCI CTD Profile2Cast ')
 parser.add_argument('filepath', metavar='filepath', type=str,
-    help='path to directory with UW processed glider files')
-parser.add_argument('-gid','--gliderid', nargs=1, type=str,
-    help='glider id used for data eg p401, p403')
+    help='path to directory with EcoFOCI CTD netcdf data')
 parser.add_argument('--plots', action="store_true",
     help='include profile and comparison plots as output')
 
 args = parser.parse_args()
 
 ### Load Data
-dives=['0260',]
+dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
 
-#dives = [f for f in os.listdir(args.filepath) if f.endswith('.nc')]
-
+#%%
 for divenum in sorted(dives):
-    fn = args.gliderid[0]+divenum+'.nc'
-    #fn = divenum
-    #print fn
+    fn = divenum
+    print fn
     
     try:
         xdf = xa.open_dataset(args.filepath+fn,decode_cf=False)
-        xdf.set_coords(['time','depth','latitude','longitude'],inplace=True)
+        #coords are time,depthlat,lon
     except:
         print fn + " unloadable - missing key variable"
         continue
     
+
     try:
-        #%%
         #defaults for sharp boundary are in subroutine or passed as keywords
         # currently -1 and 1 dt/dz (deg/m)
         (upper_depth,upper_depth_index,bottom_depth,bottom_depth_index,lower_depth,lower_depth_index) = find_sharp_grad(xdf,thresh=-1.0)
@@ -221,10 +211,6 @@ for divenum in sorted(dives):
         onem_dfa.to_netcdf('data/'+fn.replace('.nc','_m.nc'))
         print fn + " successfully adjusted"
 
-        invval,invind = find_max_inversion(salinity=onem_dfa.Salinity.values,
-                                           temperature=onem_dfa.Temperature.values,
-                                           pressure=onem_dfa.Pressure.values)
-        print("Merged DeltaSigmaT max: {}".format(invval))
 
     except: #fails sharpness routine, bin average the upcast and downcast independently
         ### Basic Plot
@@ -267,12 +253,6 @@ for divenum in sorted(dives):
         down_dfa.rename({'dim_0':'Pressure'},inplace=True)
         down_dfa.to_netcdf('data/'+fn.replace('.nc','_d.nc'))
        
-        #find inversions
-        invval,invind = find_max_inversion(salinity=down_dfa.Salinity.values,
-                                           temperature=down_dfa.Temperature.values,
-                                           pressure=down_dfa.Pressure.values)
-        print("Downcast DeltaSigmaT max: {}".format(invval))
-        
         ### Upcast
         bottom_depth = xdf.depth.max()
         bottom_depth_index = np.where(xdf.depth == bottom_depth)[0]
@@ -294,11 +274,4 @@ for divenum in sorted(dives):
                               coords={'latitude':xdf.latitude[-1],'longitude':xdf.longitude[-1],'time':xdf.time[-1]})
         up_dfa.rename({'dim_0':'Pressure'},inplace=True)
         up_dfa.to_netcdf('data/'+fn.replace('.nc','_u.nc'))        
-
-        #find inversions
-        invval,invind = find_max_inversion(salinity=up_dfa.Salinity.values,
-                                           temperature=up_dfa.Temperature.values,
-                                           pressure=up_dfa.Pressure.values)
-        
-        print("Upcast DeltaSigmaT max: {}".format(invval))
     xdf.close()
