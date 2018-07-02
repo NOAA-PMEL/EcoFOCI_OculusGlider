@@ -17,13 +17,13 @@ Priorities will be:
 - to make contour profiles (depth v time of each of the above parameters).  Ideally it would be nice if these were "slider driven" on a dynamic web page
 
 ### Included instruments (and thus the timebase for each)
-aa4330 (oxy)
+aa4330 (oxy) ***other (ERDDAP)***
     + aa4330_O2
     + aa4330_airsat
     + aa4330_temp
     + aa4330_time
     + aanderaa4330_dissolved_oxygen
-sbect (T/S/sigma-t/depth)
+sbect (T/S/sigma-t/depth) *** Profile_id***
     + ctd_pressure
     + ctd_depth (coordinate axis)
     + conductivity
@@ -34,7 +34,7 @@ sbect (T/S/sigma-t/depth)
     + sigma-t
     + latitude
     + longitude
-wlbb2fl (chlor/turb/scat)
+wlbb2fl (chlor/turb/scat) ***other (ERDDAP)***
     + wlbb2fl_time (wlbb2fl_results_time?)
     + wlbb2fl_sig470nm
     + wlbb2fl_sig695nm_adjusted
@@ -43,7 +43,7 @@ sg_data (lat,lon,depth - glider based parameters)
     + ~~longitude~~ currently on sbe timescale
     + ~~latitude~~ currently on sbe timescale
     + time
-PAR - scicon_satpar_satPAR_data_point
+PAR - scicon_satpar_satPAR_data_point ***other (ERDDAP)***
     + satPAR_Temp
     + satPAR_time
     + satPAR_PARuV
