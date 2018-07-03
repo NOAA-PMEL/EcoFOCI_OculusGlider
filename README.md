@@ -16,9 +16,8 @@ Priorities will be:
     + T/S diagrams for BS
 - to make contour profiles (depth v time of each of the above parameters).  Ideally it would be nice if these were "slider driven" on a dynamic web page
 
-### Included instruments (and thus the timebase for each)
+### Included instruments (and thus the timebase for each) Proper timebase is very important for erddap setup
 aa4330 (oxy) ***other (ERDDAP)***
-    + aa4330_O2
     + aa4330_airsat
     + aa4330_temp
     + aa4330_time
@@ -43,7 +42,7 @@ sg_data (lat,lon,depth - glider based parameters)
     + ~~longitude~~ currently on sbe timescale
     + ~~latitude~~ currently on sbe timescale
     + time
-PAR - scicon_satpar_satPAR_data_point ***other (ERDDAP)***
+PAR - scicon_satpar_satPAR_data_point ***other (ERDDAP)*** - not yet implemented
     + satPAR_Temp
     + satPAR_time
     + satPAR_PARuV
