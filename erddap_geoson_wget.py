@@ -28,8 +28,6 @@ __keywords__ = 'CTD', 'SeaWater', 'Cruise', 'derivations','erddap'
 """--------------------------------main Routines---------------------------------------"""
 
 parser = argparse.ArgumentParser(description='yawl Data Retrieval')
-parser.add_argument('Project', metavar='Project', type=str,
-               help='project name e.g. 2016_ITAE')
 parser.add_argument("-s",'--ServerName', type=str,
 			   default="http://downdraft.pmel.noaa.gov",
                help='server name, eg. http://yawl.pmel.noaa.gov')
