@@ -27,18 +27,20 @@ __keywords__ = 'CTD', 'SeaWater', 'Cruise', 'derivations','erddap'
 
 """--------------------------------main Routines---------------------------------------"""
 
-parser = argparse.ArgumentParser(description='yawl Data Retrieval')
+parser = argparse.ArgumentParser(description='erddap geojson Data Retrieval')
 parser.add_argument("-s",'--ServerName', type=str,
 			   default="http://downdraft.pmel.noaa.gov",
                help='server name, eg. http://yawl.pmel.noaa.gov')
 parser.add_argument("-e",'--ErddapID', type=str,
 			   default="sg403_PS_spring18",
                help='erddap datasetID')
-
+parser.add_argument("-o",'--outfile', type=str,
+			   default="out.geojson",
+               help='geojson output filename')
           
 args = parser.parse_args()
 
-filename = '18PS_erddap_cron.geojson'
+filename = args.outfile
 url = args.ServerName + ':8080/erddap/tabledap/'+\
 args.ErddapID + '.geoJson?ctd_depth%2Clatitude%2Clongitude%2Ctime&ctd_depth%3C=1&time%3E=2018-04-05T00%3A00%3A00Z&time%3C=2018-04-12T17%3A11%3A05Z'
 print(url)
