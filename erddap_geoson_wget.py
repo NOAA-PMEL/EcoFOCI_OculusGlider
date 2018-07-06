@@ -37,11 +37,20 @@ parser.add_argument("-e",'--ErddapID', type=str,
 parser.add_argument("-o",'--outfile', type=str,
 			   default="out.geojson",
                help='geojson output filename')
-          
+parser.add_argument("-i",'--instrument', type=str,
+			   default="oculusglider",
+               help='datasource')
+                    
 args = parser.parse_args()
 
 filename = args.outfile
-url = args.ServerName + ':8080/erddap/tabledap/'+\
-args.ErddapID + '.geoJson?ctd_depth%2Clatitude%2Clongitude%2Ctime&ctd_depth%3C=1&time%3E=2018-04-05T00%3A00%3A00Z&time%3C=2018-04-12T17%3A11%3A05Z'
+if args.instrument in ['oculusglider']:
+	url = args.ServerName + ':8080/erddap/tabledap/'+\
+	args.ErddapID + '.geoJson?ctd_depth%2Clatitude%2Clongitude%2Ctime&ctd_depth%3C=1&time%3E=2018-04-05T00%3A00%3A00Z&time%3C=2018-04-12T17%3A11%3A05Z'
+elif args.instrument in ['alamo']:
+	url = args.ServerName + ':8080/erddap/tabledap/'+\
+	args.ErddapID + '.geoJson?PRESS%2Clatitude%2Clongitude%2Ctime&PRESS%3C=1&time%3E=2018-04-05T00%3A00%3A00Z&time%3C=2018-04-12T17%3A11%3A05Z'
+else:
+	print('Currently only works with gliders and alamos')
 print(url)
 wget.download(url, filename, bar=wget.bar_thermometer)
