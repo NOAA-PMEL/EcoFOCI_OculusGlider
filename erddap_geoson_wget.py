@@ -46,7 +46,7 @@ args = parser.parse_args()
 filename = args.outfile
 if args.instrument in ['oculusglider']:
 	url = args.ServerName + ':8080/erddap/tabledap/'+\
-	args.ErddapID + '.geoJson?ctd_depth%2Clatitude%2Clongitude%2Ctime&ctd_depth%3C=1&time%3E=2018-04-05T00%3A00%3A00Z&time%3C=2018-04-12T17%3A11%3A05Z'
+	args.ErddapID + '.geoJson?profileid%2Cctd_depth%2Clatitude%2Clongitude%2Ctime&ctd_depth%3C=1&time%3E=2018-04-05'
 elif args.instrument in ['alamo']:
 	url = args.ServerName + ':8080/erddap/tabledap/'+\
 	args.ErddapID + '.geoJson?PRES%2Clatitude%2Clongitude%2Ctime&PRES%3C=1&time%3E='+datetime.datetime.now().strftime('%Y')+'&time%3C='+datetime.datetime.now().strftime('%Y-%m-%d')
