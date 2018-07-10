@@ -24,6 +24,7 @@
 """
 import argparse
 import datetime
+import os
 
 from requests.exceptions import HTTPError
 from erddapy import ERDDAP
@@ -201,6 +202,10 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   Aand_downInd,Aand_upInd = castdirection(df_aan)
   WetLabs_downInd,WetLabs_upInd = castdirection(dfwet)
 
+  image_directory = 'images/dive' + profile_idstr + '/'
+  if not os.path.exists(image_directory):
+      os.makedirs(image_directory)
+
   ########## CTD
   ### temperature
   (plt, fig) = GliderPlot.plot1plot(epic_key=['T_28','T_28u','T2_35','T2_35u'],
@@ -221,7 +226,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_temperature.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_temperature.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
   ###salinity
@@ -241,7 +246,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_salinity.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_salinity.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
   ##### optode
@@ -262,7 +267,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_O2Conc.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_O2Conc.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
   ### PSat
@@ -282,7 +287,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_O2Psat.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_O2Psat.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
 
@@ -304,7 +309,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_chl.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_chl.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
   ###cdom
@@ -324,7 +329,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_cdom.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_cdom.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
   ###turb
@@ -344,7 +349,7 @@ for inc_idnum in range(ConfigParams['divenum'],max_divenum,1):
   DefaultSize = fig.get_size_inches()
   fig.set_size_inches( (DefaultSize[0], DefaultSize[1]*2) )
 
-  plt.savefig('images/dive'+profile_idstr+'_turbidity.png', bbox_inches='tight', dpi = (300))
+  plt.savefig(image_directory + 'dive'+profile_idstr+'_turbidity.png', bbox_inches='tight', dpi = (300))
   plt.close()
 
 
