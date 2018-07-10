@@ -111,16 +111,11 @@ class CTDProfilePlot(object):
       fig = plt.figure(1)
       ax1 = fig.add_subplot(111)
       for index,value in enumerate(epic_key):
-        if updown[index] == 'u':
-          p1 = ax1.plot(xdata[index], ydata[1])
-          plt.setp(p1, **(self.var2format(value)))
-          if not ylabel == '':
-            ax1.set_ylim(bottom=-5, top=maxdepth)
-        elif updown[index] == 'd':
-          p1 = ax1.plot(xdata[index], ydata[0])
-          plt.setp(p1, **(self.var2format(value)))
-          if not ylabel == '':
-            ax1.set_ylim(bottom=-5, top=maxdepth)
+        p1 = ax1.plot(xdata[index], ydata[index])
+        plt.setp(p1, **(self.var2format(value)))
+        if not ylabel == '':
+          ax1.set_ylim(bottom=-5, top=maxdepth)
+
 
       ax1.invert_yaxis()
       plt.ylabel(ylabel, fontsize=self.labelsize, fontweight='bold')
@@ -142,21 +137,10 @@ class CTDProfilePlot(object):
       fig = plt.figure(1)
       ax1 = fig.add_subplot(111)
       for index,value in enumerate(epic_key):
-        if updown[index] == 'u':
-          p1 = ax1.plot(xdata[index], ydata[1])
-          plt.setp(p1, **(self.var2format(value)))
-          if not ylabel == '':
-            ax1.set_ylim(bottom=-5, top=maxdepth)
-        elif updown[index] == 'd':
-          p1 = ax1.plot(xdata[index], ydata[0])
-          plt.setp(p1, **(self.var2format(value)))
-          if not ylabel == '':
-            ax1.set_ylim(bottom=-5, top=maxdepth)
-        elif updown[index] == '':
-          p1 = ax1.plot(xdata[index], ydata[2])
-          plt.setp(p1, **(self.var2format(value)))
-          if not ylabel == '':
-            ax1.set_ylim(bottom=-5, top=maxdepth)
+        p1 = ax1.plot(xdata[index], ydata[index])
+        plt.setp(p1, **(self.var2format(value)))
+        if not ylabel == '':
+          ax1.set_ylim(bottom=-5, top=maxdepth)
 
       ax1.invert_yaxis()
       plt.ylabel(ylabel, fontsize=self.labelsize, fontweight='bold')

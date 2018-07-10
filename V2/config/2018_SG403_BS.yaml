@@ -1,0 +1,5 @@
+DataSetID_root: sg403_PS_spring18
+divenum: 16
+server_url: http://downdraft.pmel.noaa.gov:8080/erddap
+sgid_num: '403'
+sgid_string: sg403
