@@ -1,0 +1,5 @@
+DataSetID_root: sg404_BF_Summer18
+divenum: 15
+server_url: http://downdraft.pmel.noaa.gov:8080/erddap
+sgid_num: '404'
+sgid_string: sg404

@@ -200,17 +200,17 @@ if not os.path.exists(image_directory):
 
 ########## CTD
 ### temperature
-(fig,ax) = plot_params(dfs['sg403_PS_spring18'], 'temperature','Temperature (DegC)')
+(fig,ax) = plot_params(dfs[ConfigParams['DataSetID_root']], 'temperature','Temperature (DegC)')
 plt.savefig(image_directory + ConfigParams['sgid_string'] +'_temperature.png', bbox_inches='tight', dpi = (300))
 plt.close()
 
 ### salinity
-(fig,ax) = plot_params(dfs['sg403_PS_spring18'], 'salinity','Salinity (PSU)',cmocean.cm.haline)
+(fig,ax) = plot_params(dfs[ConfigParams['DataSetID_root']], 'salinity','Salinity (PSU)',cmocean.cm.haline)
 plt.savefig(image_directory + ConfigParams['sgid_string'] +'_salinity.png', bbox_inches='tight', dpi = (300))
 plt.close()  
 
 ### density
-plot_params(dfs['sg403_PS_spring18'], 'density','Density',cmocean.cm.dense)
+plot_params(dfs[ConfigParams['DataSetID_root']], 'density','Density',cmocean.cm.dense)
 plt.savefig(image_directory + ConfigParams['sgid_string'] +'_density.png', bbox_inches='tight', dpi = (300))
 plt.close()  
 
