@@ -3,6 +3,10 @@
 ## Background
 Purpose is to parse Glider NetCDF files as they come from the glider base station and to provide visualization of the data for scientific discussion.  It is assumed that much of the engineering discussion can be framed around the graphics and information provided by the UW basestation software.
 
+### 2019 Deployment
+- data structure was similar to 2018 deployment (regarding timebase and erddap hosting)
+***Glider Lost in Bering - Halted all other glider deployments***
+
 ### 2018 Deployment
 There are three gliders being deployed for 2018.  Two will be deployed in the Bering Sea and one will be deployed in the Beaufort.   
 Priorities will be:
@@ -15,39 +19,46 @@ Priorities will be:
     + Chlor-A
     + T/S diagrams for BS
 - to make contour profiles (depth v time of each of the above parameters).  Ideally it would be nice if these were "slider driven" on a dynamic web page
+***No 2018 Data was obtained beyond Puget Sound Tests***
 
 ### Included instruments (and thus the timebase for each) Proper timebase is very important for erddap setup
-aa4330 (oxy) ***other (ERDDAP)***
-    + aa4330_airsat
-    + aa4330_temp
-    + aa4330_time
-    + aanderaa4330_dissolved_oxygen
-sbect (T/S/sigma-t/depth) *** Profile_id***
-    + ctd_pressure
-    + ctd_depth (coordinate axis)
-    + conductivity
-    + salinity
-    + salinity_raw
-    + temperature
-    + ctd_time
-    + sigma-t
-    + latitude
-    + longitude
-wlbb2fl (chlor/turb/scat) ***other (ERDDAP)***
-    + wlbb2fl_time (wlbb2fl_results_time?)
-    + wlbb2fl_sig470nm
-    + wlbb2fl_sig695nm_adjusted
-    + wlbb2fl_sig700nm_adjusted
-sg_data (lat,lon,depth - glider based parameters)
-    + ~~longitude~~ currently on sbe timescale
-    + ~~latitude~~ currently on sbe timescale
-    + time
-PAR - scicon_satpar_satPAR_data_point ***other (ERDDAP)*** - not yet implemented
-    + satPAR_Temp
-    + satPAR_time
-    + satPAR_PARuV
+aa4330 (oxy) ***other (ERDDAP)***  
+    + aa4330_airsat  
+    + aa4330_temp  
+    + aa4330_time  
+    + aanderaa4330_dissolved_oxygen  
+sbect (T/S/sigma-t/depth) *** Profile_id***  
+    + ctd_pressure  
+    + ctd_depth (coordinate axis)  
+    + conductivity  
+    + salinity  
+    + salinity_raw  
+    + temperature  
+    + ctd_time  
+    + sigma-t  
+    + latitude  
+    + longitude  
+wlbb2fl (chlor/turb/scat) ***other (ERDDAP)***  
+    + wlbb2fl_time (wlbb2fl_results_time?)  
+    + wlbb2fl_sig470nm  
+    + wlbb2fl_sig695nm_adjusted  
+    + wlbb2fl_sig700nm_adjusted  
+sg_data (lat,lon,depth - glider based parameters)  
+    + ~~longitude~~ currently on sbe timescale  
+    + ~~latitude~~ currently on sbe timescale  
+    + time  
+PAR - scicon_satpar_satPAR_data_point ***other (ERDDAP)*** - not yet implemented  
+    + satPAR_Temp  
+    + satPAR_time  
+    + satPAR_PARuV.  
 
 *** NOTE: *** only CTD timeseries will have explicit depth paramter.  Other parameters will need to be matched in time with no depth parameter
+
+___Significant Changes to data format and instrumentation made between deployments___
+
+###2017 Deployment
+- see V1 Documentation
+
 
 ################
 
